@@ -12,11 +12,25 @@ T = 100
 K = 100
 
 #parameter spaces
-M = 30
+M = 10
 beta_space = np.linspace(0, 4, num=M)
 sigma_space = np.exp(np.linspace(np.log(0.4), np.log(4), num=M))
 m_space = np.linspace(0, T, num=M)
 r_space = np.arange(10) + 1
+
+def sample_from_priori(priori, model = None):
+
+    flat_prob_dist = priori.ravel()
+    flat_index = np.random.choice(len(flat_prob_dist), p=flat_prob_dist)
+    rows, cols = priori.shape
+    row, col = divmod(flat_index, cols)
+
+    if model == 'ramp':
+        return beta_space[row], sigma_space[col]
+    elif model == 'step':
+        return m_space[row], r_space[col]
+    else:
+        raise Exception('Token = step or ramp')
 
 def generate_N_trials(N, model):
 

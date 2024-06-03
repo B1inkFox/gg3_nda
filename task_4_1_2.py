@@ -39,14 +39,15 @@ step_priori_uniform = np.ones([len(m_space), len(r_space)]) / (len(m_space)*len(
 
 
 
+gamma = 2 #gamma = 1 to 5
 iter = 100
-N = 5
+N = 25
 
 result_step = np.empty([])
 error_step = 0
 for i in range(iter):
     m,r = sample_from_priori(step_priori_gauss, model = 'step')
-    shmm = HMM_Step(m, r, x0, Rh, T)
+    shmm = HMM_Step(m, r, x0, Rh, T, isi_gamma_shape=gamma)
     shmm_datas = generate_N_trials(N, shmm)
     bayes = compute_bayes_factor(shmm_datas, ramp_priori_uniform, step_priori_uniform)
     result_step = np.append(result_step, bayes)
@@ -59,7 +60,7 @@ result_ramp = np.empty([])
 error_ramp = 0
 for i in range(iter):
     beta, sigma = sample_from_priori(ramp_priori_gauss, model = 'ramp')
-    rhmm = HMM_Ramp(beta, sigma, K, x0, Rh, T)
+    rhmm = HMM_Ramp(beta, sigma, K, x0, Rh, T, isi_gamma_shape=gamma)
     rhmm_datas = generate_N_trials(N, rhmm)
     bayes = compute_bayes_factor(rhmm_datas, ramp_priori_uniform, step_priori_uniform)
     result_ramp = np.append(result_ramp, bayes)

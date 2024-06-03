@@ -3,7 +3,6 @@ from inference import *
 from HMM_models import *
 from HMM_inference import *
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import numpy as np
 
 #parameter spaces

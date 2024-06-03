@@ -1,39 +1,42 @@
 # import
 from inference import *
 from HMM_models import *
+from HMM_inference import *
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
 
-#common parameters
-x0 = 0.2
-Rh = 75
-T = 100
-K = 100
 
-#parameter spaces
-M = 10
-beta_space = np.linspace(0, 4, num=M)
-sigma_space = np.exp(np.linspace(np.log(0.4), np.log(4), num=M))
-m_space = np.linspace(0, T, num=M)
-r_space = np.arange(10) + 1
+ramp_priori = np.ones([len(beta_space), len(sigma_space)]) / (len(beta_space)*len(sigma_space))
+step_priori = np.ones([len(m_space), len(r_space)]) / (len(m_space)*len(r_space))
 
-# define parameters ramp
-beta = 2
-sigma = 2
 
-# define parameters step
-m = 60
-r = 5
-
-rhmm = HMM_Ramp(beta, sigma, K, x0, Rh, T)
-shmm = HMM_Step(m, r, x0, Rh, T)
-
+gamma = 2 #gamma = 1 to 5
+iter = 100
 N = 25
-rhmm_datas = np.empty([N, T], dtype = np.int32)
-shmm_datas = np.empty([N, T], dtype = np.int32)
-for i in range(N):
-    latent_ramp, rate_ramp, spike_ramp = rhmm.simulate()
-    latent_step, rate_step, spike_step = shmm.simulate()
-    rhmm_datas[i] = spike_ramp
-    shmm_datas[i] = spike_step
+
+result_step = np.empty([])
+error_step = 0
+for i in range(iter):
+    m,r = sample_from_priori(step_priori, model = 'step')
+    shmm = HMM_Step(m, r, x0, Rh, T, isi_gamma_shape=gamma)
+    shmm_datas = generate_N_trials(N, shmm)
+    bayes = compute_bayes_factor(shmm_datas, ramp_priori, step_priori)
+    result_step = np.append(result_step, bayes)
+    if bayes < 0:
+        error_step += 1
+#print('Step decision results', result_step)
+print('Step decision accuracy', error_step / iter)
+
+result_ramp = np.empty([])
+error_ramp = 0
+for i in range(iter):
+    beta, sigma = sample_from_priori(ramp_priori, model = 'ramp')
+    rhmm = HMM_Ramp(beta, sigma, K, x0, Rh, T, isi_gamma_shape=gamma)
+    rhmm_datas = generate_N_trials(N, rhmm)
+    bayes = compute_bayes_factor(rhmm_datas, ramp_priori, step_priori)
+    result_ramp = np.append(result_ramp, bayes)
+    if bayes > 0:
+        error_ramp += 1
+#print('Ramp decision results', result_ramp)
+print('Step decision accuracy', error_ramp / iter)
