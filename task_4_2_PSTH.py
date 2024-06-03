@@ -2,7 +2,6 @@
 from inference import *
 from HMM_models import *
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import numpy as np
 
 #common parameters
@@ -10,9 +9,6 @@ x0 = 0.2
 Rh = 75
 T = 100
 K = 100
-gamma = 5
-
-t = 1000
 
 # define parameters ramp
 beta = 2
@@ -22,27 +18,33 @@ sigma = 2
 m = 60
 r = 5
 
-rhmm = HMM_Ramp(beta, sigma, K, x0, Rh, T, isi_gamma_shape = gamma)
-shmm = HMM_Step(m, r, x0, Rh, T, isi_gamma_shape = gamma)
-
 def trial_average(model, iterations, t, N):
     
     bin = np.zeros(t)
     for i in range(iterations):
         latent, rate, spikes = model.simulate()
-        bin += spikes[0]
+        bin += spikes
     bin  = bin / iterations
     
     bin = np.convolve(bin, np.ones(N)/N, mode='valid')
-    return bin * t
+    return bin
 
-model = rhmm
-bin = trial_average(model, 2500, t, 50)
-spike_times = np.linspace(0, 1, num = bin.shape[0], endpoint = False)
+for gamma in range(2,6):
+    model = HMM_Ramp(beta, sigma, K, x0, Rh, T, isi_gamma_shape = gamma)
+    bin = trial_average(model, 1000, T, 5)
+    spike_times = np.linspace(0, 1, num = bin.shape[0], endpoint = False)
+    plt.plot(spike_times, bin, label = 'PSTH for $\gamma$ = '+str(gamma))
+plt.title('PSTH of ramp model  ' + '$\\beta$=' + str(beta) + '  $\sigma$=' + str(sigma))
+plt.xlabel('time (s)')
+plt.legend()
+plt.show()
 
-plt.plot(spike_times, bin, label = 'PSTH over 2500 samples')
+for gamma in range(2,6):
+    model = HMM_Step(m, r, x0, Rh, T, isi_gamma_shape = gamma)
+    bin = trial_average(model, 1000, T, 5)
+    spike_times = np.linspace(0, 1, num = bin.shape[0], endpoint = False)
+    plt.plot(spike_times, bin, label = 'PSTH for $\gamma$ = '+str(gamma))
 plt.title('PSTH of step model  '+'m ='+str(m)+'  r='+str(r))
-#plt.title('PSTH of ramp model  ' + '$\\beta$=' + str(bet) + '  $\sigma$=' + str(sig))
-plt.xlabel('time (s)   ' + 't=' + str(t))
+plt.xlabel('time (s)')
 plt.legend()
 plt.show()
