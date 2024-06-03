@@ -8,21 +8,6 @@ import numpy as np
 from scipy.stats import truncnorm
 np.random.seed(922)
 
-
-#common parameters
-x0 = 0.2
-Rh = 75
-T = 100
-K = 100
-
-# original parameter spaces
-M = 30
-beta_space = np.linspace(0, 4, num=M)
-sigma_space = np.exp(np.linspace(np.log(0.4), np.log(4), num=M))
-m_space = np.linspace(0, T, num=M)
-r_space = np.arange(10) + 1
-
-
 # Truncated Gaussian prior
 beta_center = beta_space[0]
 sigma_center = (sigma_space[0] + sigma_space[-1]) / 2
@@ -49,6 +34,10 @@ for p in [beta_prior, sigma_prior, m_prior, r_prior]:
 
 ramp_priori = np.outer(beta_prior, sigma_prior)
 step_priori = np.outer(m_prior, r_prior)
+
+
+
+
 
 
 # define parameters ramp

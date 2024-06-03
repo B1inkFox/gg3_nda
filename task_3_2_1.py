@@ -9,6 +9,10 @@ import numpy as np
 ramp_priori = np.ones([len(beta_space), len(sigma_space)]) / (len(beta_space)*len(sigma_space))
 step_priori = np.ones([len(m_space), len(r_space)]) / (len(m_space)*len(r_space))
 
+
+
+
+
 # define parameters ramp
 beta = 2
 sigma = 2
